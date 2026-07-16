@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>生日快乐</title>
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ffd6e7,#fff3b0);
+    font-family:"Microsoft YaHei",sans-serif;
+    text-align:center;
+}
+.card{
+    background:white;
+    padding:40px;
+    border-radius:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+h1{color:#ff6699;font-size:42px;}
+p{font-size:20px;color:#666;}
+button{
+    padding:12px 30px;
+    border:0;
+    border-radius:30px;
+    background:#ff6699;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+<h1>🎂 生日快乐 🎂</h1>
+<p>祝你生日快乐，愿每天都有好心情！</p>
+<button onclick="playSong()">重新播放生日歌</button>
+</div>
+
+<script>
+let audioCtx;
+
+function playSong(){
+    if(audioCtx) audioCtx.close();
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Happy Birthday melody (C major)
+    const notes = [
+      [264,0.35],[264,0.15],[297,0.5],[264,0.5],[352,0.5],[330,1],
+      [264,0.35],[264,0.15],[297,0.5],[264,0.5],[396,0.5],[352,1],
+      [264,0.35],[264,0.15],[528,0.5],[440,0.5],[352,0.5],[330,0.5],[297,1],
+      [466,0.35],[466,0.15],[440,0.5],[352,0.5],[396,0.5],[352,1]
+    ];
+
+    let time = audioCtx.currentTime;
+
+    notes.forEach(n=>{
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+
+        osc.type="sine";
+        osc.frequency.value=n[0];
+
+        gain.gain.setValueAtTime(0.001,time);
+        gain.gain.exponentialRampToValueAtTime(0.25,time+0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001,time+n[1]);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(time);
+        osc.stop(time+n[1]);
+
+        time += n[1]+0.05;
+    });
+}
+
+window.onload=function(){
+    // 浏览器限制自动播放，首次点击页面后播放
+    document.body.addEventListener("click", function once(){
+        playSong();
+        document.body.removeEventListener("click", once);
+    });
+};
+</script>
+
+</body>
+</html>
